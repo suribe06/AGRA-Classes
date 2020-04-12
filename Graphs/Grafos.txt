@@ -1,0 +1,26 @@
+¿Que es un grafo?
+
+R ⊆ V x V
+Es una relacion binaria sobre un conjunto de vertices V
+
+¿Como se identifica un grafo?
+G = (V, E) con E ⊆ V x V
+
+Tipos de Grafos:
+- No Dirigidos: Son simetricos
+- Dirigidos: No necesariamente son simetricos
+
+Un arbol es un grafo aciclico que entre un par de vertices solo hay un camino
+
+Grafo denso: matriz de adyacencia
+Grafo disperso: lista de adyacencia
+
+PARA GRAFOS NO DIRIGIDOS...
+Definicion Conectividad: Un grafo G = (V, E) es conexo si y solo si para todos u, v ∈ V existe un camino u -> v
+Definicion Componente Conexo: Un subgrafo H de G es componente conexo si H es conexo y maximal
+
+popleft es para bfs
+pop es para dfs
+
+Grafos Dirigidos, Orden topologico:
+Una permutacion de vertices en V digamos v0, v1, ..., vn tal que cara cualquiera 0 <= i < j < n vi sea alcanzable desde vj.

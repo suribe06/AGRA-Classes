@@ -1,0 +1,204 @@
+Búsqueda en profundidad anotada
+===============================
+
+Considere el siguiente algoritmo de búsqueda en profundidad, para un
+grafo G=(V, E) no dirigido.
+
+visited,parent = None,None
+
+def dfs(G):
+  '''recursive DFS algorithm for a graph G in adjacency list
+     representation with vertices V = { 0, 1, len(G)-1 }
+  '''
+  global visited,parent
+  visited = [ 0 for _ in G ]
+  parent = [ -1 for _ in G ]
+  for u in range(len(G)):
+    if visited[u]==0:
+      dfs_visit(G, u)
+
+def dfs_visit(G, u):
+  visited[u] = 1
+  for v in G[u]:
+    if visited[v]==0:
+      parent[v] = u
+      dfs_visit(G, v)
+  visited[u] = 2
+
+Este algoritmo sirve para grafos conectados y desconectados, y tiene
+una complejidad temporal O(|V|+|E|) y espacial O(|V|).
+
+Anotar el árbol generado por la búsqueda en profundidad con los
+tiempos de descubrimiento y finalización de procesamiento de cada uno
+de los vértices será de utilidad para identificar propiedades
+topológicas del grafo.
+
+la idea de la anotación con tiempo es la siguiente:
+
+  - Se usará un reloj "global" que se modica únicamente cuando un
+    tiempo es asignado.
+
+  - Para cada vértices del árbol de la búsqueda en profunidad (o
+    vértice del grafo dado) se asigna el tiempo en el cual es
+    descubierto por primera vez.
+
+  - Para cada vértices del árbol de la búsqueda en profunidad (o
+    vértice del grafo dado) se asigna el tiempo en el cual ha sido
+    procesado (junto con todos sus descendientes en el árbol de la
+    búsqueda).
+  
+A continuación se presenta el algoritmo que incorpora estas
+extensiones:
+
+visited,parent = None,None
+tin,tout,time = None,None,None
+
+def dfs(G):
+  '''recursive DFS algorithm for a graph G in adjacency list
+     representation with vertices V = { 0, 1, len(G)-1 }
+  '''
+  global visited,parent,time,tin,tout
+  visited = [ 0 for _ in G ]
+  parent = [ -1 for _ in G ]
+  tin = [ None for _ in G ]
+  tout = [ None for _ in G ]
+  time = 0
+  for u in range(len(G)):
+    if visited[u]==0:
+      dfs_visit(G, u)
+
+def dfs_visit(G, u):
+  global visited,tin,tout,time
+  visited[u],tin[u],time = 1,time,time+1
+  for v in G[u]:
+    if visited[v]==0:
+      parent[v] = u
+      dfs_visit(G, v)
+  visited[u],tout[u],time = 2,time,time+1
+
+
+Con base en el algorito anotado de DFS se demostrarán las siguientes
+dos propiedades.
+
+Sea G=(V,E) un grafo no dirigido y conexo, y T=(V,F) un árbol de
+búsqueda en profundidad generado por el algoritmo anterior.
+
+----Repaso de lógica proposicional----
+
+Para demostrar una implicación de la forma
+
+  P -> Q
+
+hay varias opciones:
+
+  - Suponer P y llegar a Q
+
+    |- P -> Q    sii    P |- Q               (Metateorema de la Deducción)
+
+  - Suponer P, la negación de Q y llegar a una contradicción.
+
+    |- P -> Q    <->   (P /\ Q) -> false     (Teorema proposicional)
+
+  - Una demostración por contrapositiva.
+
+    |- P -> Q    <->   ((not Q) -> (not P))  (Teorema proposicional)
+
+----fin repaso----
+
+
+0. Suponga que r en V es la raíz de T. Entonces:
+
+   r es un punto de articulación de V
+
+   sii
+
+   r tiene al menos dos hijos en T.
+
+   Demostración.
+
+   (=>) Suponemos que r es un punto de articulación de V.
+
+   - Si la cantidad de hijos de r en T es 0, entonces o bien G está
+     desconectado o r es el único vértice del grafo G. Por la
+     suposición de que G es conexo, la única opción entonces es que r
+     es único vértice del grafo G. Pero esto no puede ser cierto dado
+     que r es un punto de articulación: si se quita el único vértice
+     de un grafo, este no se desconecta.
+
+   - Si la cantidad de hijos de r en T es 1, entonces supongamos que s
+     es el hijo de r en s. Sean u,v cualesquiera vértices en G
+     (diferentes a r). Dado que G es conexo, sabemos que u,v son
+     descendientes de r en T. Dado que s es el único hijo de r,
+     podemos observar que u,v también son descendientes de s en T
+     (posiblemente alguno de ellos o los dos sean s --no importa).
+     Note que cualquier camino en T entre u y v que pase por r puede
+     convertirse en un camino entre u y v que no pase por r. Es decir,
+     al eliminar r de G no se desconecta ningún par de vértices.
+
+   En cualquiera de los dos casos es imposible que r sea un punto de
+   articulación. Es decir, r en T debe tener al menos dos hijos.
+
+   (<=) Suponemos que r tiene al menos dos hijos en T. Sean u y v
+   vértices dos subárboles distintos de r en T. Hacia una
+   contradicción suponga que r no es un punto de articulación de G.
+   Es decir, hay un camino entre u y v en G que no pasa por r. Note
+   que si u fue descubierto primero que v en la construcción de T,
+   necesariamente v debe ser un descendiente de u en T. Sin embargo,
+   esto contradice el hecho de que u y v están en distintos subárboles
+   de r en T. Luego, no existe tal camino entre u y v sin pasar por r
+   en G.  Note que el caso en el cual v es descubierto antes de u es
+   similar al expuesto anteriormente. En consecuencia, r debe ser un
+   punto de articulación en G.
+
+
+1. Suponga que u en V NO es la raíz de T. Entonces:
+
+   u es un punto de articulación de V
+
+   sii
+
+   u tiene al menos un hijo s tal que no existe un 'back edge' desde s
+   o desde algún descendiente de s en T a un ancestro propio de u.
+
+   Demostración. 
+
+   (=>) Suponemos que u es un punto de articulación. El objetivo es
+   demostrar que hay un hijo s tal que no existe un 'back edge' desde
+   s o desde algún descendiente de s en T a un ancestro propio de u.
+   Hacia una contradicción, suponga cualquier hijo s de u en T es tal
+   existe al menos un 'back edge' desde s o alguno de sus
+   descendientes en T a un ancestro propio de u. Sean v y w vértices
+   de G, distintos a u. El análisis se hace por casos:
+
+   - Caso en que v y w no son descendientes de u. Como el grafo es
+     conexo existe un camino entre v y w que pasa por la raíz T.
+
+   - Caso en que v es descendiente de u en T y w no lo es. Por
+     suposición, hay un camino de v a un ancestro de u y de este
+     ancestro hay un camino a w (por suposición).
+
+   - Caso en que v,w son descendientes de u. Acá hay dos casos:
+
+     Subcaso 1: v,w hacen parte del mismo subárbol de u en T. En este
+     caso hay un camino entre v y w sin pasar por u.
+
+     Subcaso 2: v,w hacen parte de diferentes subárboles de u. Por
+     suposición (i.e., 'back edges') hay un camino de v a un ancestro
+     propio de u; igual para w. Dado que G es conexo, entonces hay un
+     camino entre estos dos ancestros (puede ser el mismo) y, en
+     consecuencia, hay un camino entre v y w.
+
+   En ninguno de los casos se desconecta G, lo cual contradice el
+   hecho de que u es un punto de articulación. Es decir,
+   necesariamente u tiene al menos un hijo s tal que no existe un
+   'back edge' desde s o desde algún descendiente de s en T a un
+   ancestro propio de u.
+
+   (<=) Suponemos que u tiene al menos un hijo s tal que no existe un
+   'back edge' desde s o desde algún descendiente de s en T a un
+   ancestro propio de u. Sea v un descendiente de s en T (puede ser s
+   mismo) y w un vértice que no hace parte de los descendientes de u
+   en T (hay al menos uno porque u no es raíz en T). Note que
+   cualquier camino entre v y w en G necesariamente pasa por u. Es
+   decir, al eliminar u de G, los vértices v y w se
+   desconectan. Luego, u es un punto de articulación de G.

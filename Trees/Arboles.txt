@@ -1,0 +1,7 @@
+ARBOLES:
+Que es un arbol?
+- Es un grafo (no dirigido) conexo y aciclico
+
+Alternativas:
+- Un grafo es un arbol si existe un unico camino simple (sin repetición de vertices) entre cualquier par de vertices.
+
